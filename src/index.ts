@@ -19,6 +19,15 @@ const projectRoot = args._[0] || process.cwd();
 
 const configPath = resolve(projectRoot, 'site-search.config');
 
+const contentSelector = {
+  type: 'object',
+  properties: {
+    selector: { type: 'string' },
+    default: { type: 'string', nullable: true },
+  },
+  required: ['selector'],
+} as const;
+
 const configSchema: JSONSchemaType<SiteSearchConfig> = {
   type: 'object',
   properties: {
@@ -30,15 +39,10 @@ const configSchema: JSONSchemaType<SiteSearchConfig> = {
     selectors: {
       type: 'object',
       properties: {
-        lvl0: { type: 'string' },
-        lvl1: { type: 'string' },
-        lvl2: { type: 'string' },
-        lvl3: { type: 'string' },
-        lvl4: { type: 'string' },
-        lvl5: { type: 'string' },
-        text: { type: 'string' },
+        hierarchy: { type: 'array', items: contentSelector },
+        text: contentSelector,
       },
-      required: ['lvl0', 'lvl1', 'lvl2', 'lvl3', 'lvl4', 'lvl5', 'text'],
+      required: ['hierarchy', 'text'],
     },
   },
   required: ['siteOrigin', 'siteReadyProbe'],
@@ -170,12 +174,12 @@ export default async function run() {
 
         const index = lunr(function () {
           this.ref('id');
-          this.field('lvl0');
-          this.field('lvl1');
-          this.field('lvl2');
-          this.field('lvl3');
-          this.field('lvl4');
-          this.field('lvl5');
+          for (const level of config.selectors.hierarchy.keys()) {
+            this.field(`l_${level}`, {
+              extractor: (doc: object) =>
+                (doc as IndexedDocument).hierarchy[level] || '',
+            });
+          }
           this.field('text');
 
           this.metadataWhitelist = ['position'];
@@ -192,6 +196,10 @@ export default async function run() {
           JSON.stringify({
             corpus,
             index: index.toJSON(),
+            hierarchy: Array.from(
+              config.selectors.hierarchy.keys(),
+              (level) => `l_${level}`
+            ),
           })
         );
       })(),

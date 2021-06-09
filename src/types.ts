@@ -1,18 +1,12 @@
-export const LEVELS = [
-  'lvl0',
-  'lvl1',
-  'lvl2',
-  'lvl3',
-  'lvl4',
-  'lvl5',
-  'text',
-] as const;
+export interface ContentSelector {
+  selector: string;
+  default?: string;
+}
 
-export type Level = typeof LEVELS[number];
-
-export type ContentSelectors = {
-  [key in Level]: string;
-};
+export interface ContentSelectors {
+  hierarchy: ContentSelector[];
+  text: ContentSelector;
+}
 
 export interface SiteSearchConfig {
   siteStartCmd?: string;
@@ -23,10 +17,10 @@ export interface SiteSearchConfig {
   selectors: ContentSelectors;
 }
 
-export type IndexedRecord = Partial<
-  Record<Level, string> & {
-    anchor: string;
-  }
->;
+export interface IndexedRecord {
+  hierarchy: (string | null)[];
+  text: string;
+  anchor: string | null;
+}
 
 export type IndexedDocument = IndexedRecord & { path: string };

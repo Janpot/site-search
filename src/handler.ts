@@ -1,6 +1,6 @@
 import lunr from 'lunr';
 import { IncomingMessage, ServerResponse } from 'http';
-import { IndexedDocument, Level, LEVELS } from './types';
+import { IndexedDocument } from './types';
 
 let lunrIndex: lunr.Index | undefined;
 function getIndex(serializedLunrIndex: object): lunr.Index {
@@ -16,39 +16,27 @@ type LevelPosition = {
   position: Position[];
 };
 
-type DocMatchPositions = Partial<Record<Level, LevelPosition>>;
+type DocMatchPositions = Partial<Record<`l_${number}` | 'text', LevelPosition>>;
 
 type DocMatchesPositions = {
   [match: string]: DocMatchPositions;
 };
 
-function mergePositions(
+function mergeTextPositions(
   docMatchPositions: DocMatchesPositions
-): DocMatchPositions {
-  const result: DocMatchPositions = {};
+): Position[] {
+  const result: Position[] = [];
   for (const matchPosition of Object.values(docMatchPositions)) {
-    for (const level of LEVELS) {
-      const levelMatchPosition = matchPosition[level];
-      if (!levelMatchPosition) {
-        continue;
-      }
-      const resultLevel = result[level];
-      if (resultLevel) {
-        resultLevel.position.push(...levelMatchPosition.position);
-      } else {
-        result[level] = { position: [...levelMatchPosition.position] };
-      }
+    const levelMatchPosition = matchPosition.text;
+    if (!levelMatchPosition) {
+      continue;
     }
+    result.push(...levelMatchPosition.position);
   }
 
-  for (const level of LEVELS) {
-    const resultLevel = result[level];
-    if (resultLevel) {
-      resultLevel.position.sort((a, b) => {
-        return a[0] - b[0] || b[1] - a[1];
-      });
-    }
-  }
+  result.sort((a, b) => {
+    return a[0] - b[0] || b[1] - a[1];
+  });
 
   return result;
 }
@@ -56,9 +44,6 @@ function mergePositions(
 interface Snippet {
   parts: string[];
 }
-type Snippets = {
-  [key in Level]?: Snippet;
-};
 
 export interface BuildSnippetOptions {
   highlights?: Position[];
@@ -137,25 +122,8 @@ export function buildSnippet(
   return { parts };
 }
 
-function buildSnippets(
-  doc: IndexedDocument,
-  positions: DocMatchPositions
-): Snippets {
-  const result: Snippets = {};
-  for (const level of LEVELS) {
-    const text = doc[level];
-    if (typeof text === 'string') {
-      const positionsObj = positions[level];
-      result[level] = buildSnippet(text, {
-        highlights: positionsObj?.position,
-      });
-    }
-  }
-  return result;
-}
-
 async function search(
-  { corpus, index: serializedLunrIndex }: SerializedIndexData,
+  { hierarchy, corpus, index: serializedLunrIndex }: SerializedIndexData,
   query: string
 ): Promise<SearchApiResult[]> {
   const index = getIndex(serializedLunrIndex);
@@ -163,15 +131,16 @@ async function search(
   const results = index.search(query);
   return results.slice(0, 10).map((result) => {
     const doc = corpus[Number(result.ref)];
-    const positions = mergePositions(
+    const highlights = mergeTextPositions(
       result.matchData.metadata as DocMatchesPositions
     );
-    const snippets = buildSnippets(doc, positions);
+
+    const snippet = buildSnippet(doc.text, { highlights });
 
     return {
-      doc,
+      hierarchy: doc.hierarchy,
       score: result.score,
-      snippets,
+      snippet,
     };
   });
 }
@@ -179,6 +148,7 @@ async function search(
 export interface SerializedIndexData {
   corpus: IndexedDocument[];
   index: object;
+  hierarchy: `l_${number}`[];
 }
 
 export interface Options {
@@ -186,9 +156,9 @@ export interface Options {
 }
 
 export interface SearchApiResult {
-  doc: IndexedDocument;
+  hierarchy: (string | null)[];
   score: number;
-  snippets: Snippets;
+  snippet: Snippet;
 }
 
 export interface SearchApiResponse {

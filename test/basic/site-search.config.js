@@ -8,12 +8,13 @@ module.exports = {
   siteReadyProbe: '/',
   outputPath: './output/site-search.json',
   selectors: {
-    lvl0: 'h1',
-    lvl1: 'h2',
-    lvl2: 'h3',
-    lvl3: 'h4',
-    lvl4: 'h5',
-    lvl5: 'h6',
-    text: 'p',
+    hierarchy: [
+      { selector: 'h1' },
+      { selector: 'h2' },
+      { selector: 'h3' },
+      { selector: 'h4' },
+      { selector: 'h5' },
+    ],
+    text: { selector: 'p' },
   },
 };

@@ -1,14 +1,4 @@
-import { ContentSelectors, IndexedRecord, Level } from './types';
-
-const levels: Level[] = [
-  'lvl0',
-  'lvl1',
-  'lvl2',
-  'lvl3',
-  'lvl4',
-  'lvl5',
-  'text',
-];
+import { ContentSelectors, IndexedRecord } from './types';
 
 function innerText(elm: Element) {
   const clone = elm.cloneNode(true) as Element;
@@ -25,13 +15,11 @@ function walk(elm: Element, visitor: (elm: Element) => boolean) {
   }
 }
 
-function getLevel(elm: Element, selectors: ContentSelectors): Level | null {
-  for (const level of levels) {
-    if (elm.matches(selectors[level])) {
-      return level;
-    }
-  }
-  return null;
+function getLevel(elm: Element, selectors: ContentSelectors): number | null {
+  const level = selectors.hierarchy.findIndex(({ selector }) =>
+    elm.matches(selector)
+  );
+  return level < 0 ? null : level;
 }
 
 function getOwnAnchor(elm: Element) {
@@ -52,47 +40,58 @@ export default function extractRecords(
   selectors: ContentSelectors
 ): IndexedRecord[] {
   const result: IndexedRecord[] = [];
-  const current: IndexedRecord = {};
-  let currentLevel: Level | null = null;
+  let currentHierarchy: (string | null)[] = [];
+  let currentText: string | null = null;
+  let currentLevel: number | null = null;
+  let currentAnchor: string | null = null;
 
   walk(root, (elm) => {
     const level = getLevel(elm, selectors);
+    const isText = elm.matches(selectors.text.selector);
     const content = innerText(elm);
     const anchor = getAnchor(elm);
-    if (!level || !content) {
+    if (!content) {
       return true;
-    } else if (level === 'text') {
-      current.text = (current.text ? current.text + '\n' : '') + content.trim();
-    } else if (currentLevel) {
-      const currentLevelIndex = levels.indexOf(currentLevel);
-      const newLevelIndex = levels.indexOf(level);
-      if (!current.text && currentLevelIndex < newLevelIndex) {
+    } else if (typeof level !== 'number' && !isText) {
+      return true;
+    } else if (isText) {
+      currentText = (currentText ? currentText + '\n' : '') + content.trim();
+    } else if (typeof level === 'number' && typeof currentLevel === 'number') {
+      if (!currentText && currentLevel < level) {
         currentLevel = level;
-        current[level] = content;
+        currentHierarchy[level] = content;
       } else {
-        if (current.text) {
-          result.push({ ...current });
+        if (currentText) {
+          result.push({
+            hierarchy: [...currentHierarchy],
+            text: currentText,
+            anchor: currentAnchor,
+          });
         }
-        for (const removeLevel of levels.slice(newLevelIndex, levels.length)) {
-          delete current[removeLevel];
-        }
-        current[level] = content;
+        currentHierarchy = currentHierarchy.slice(0, level + 1);
+        currentText = null;
+        currentAnchor = null;
+        currentHierarchy[level] = content;
       }
       if (anchor) {
-        current.anchor = anchor;
+        currentAnchor = anchor;
       }
-    } else if (level) {
+    } else if (typeof level === 'number') {
       currentLevel = level;
-      current[level] = content;
+      currentHierarchy[level] = content;
       if (anchor) {
-        current.anchor = anchor;
+        currentAnchor = anchor;
       }
     }
     return false;
   });
 
-  if (current.text) {
-    result.push({ ...current });
+  if (currentText) {
+    result.push({
+      hierarchy: [...currentHierarchy],
+      text: currentText,
+      anchor: currentAnchor,
+    });
   }
 
   return result;

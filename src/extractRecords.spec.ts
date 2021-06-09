@@ -18,33 +18,38 @@ test('Basic text extraction', () => {
   `);
 
   const records = extractRecords(window.document.body, {
-    lvl0: 'section h1',
-    lvl1: 'section h2',
-    lvl2: 'section h3',
-    lvl3: 'section h4',
-    lvl4: 'section h5',
-    lvl5: 'section h6',
-    text: 'section p',
+    hierarchy: [
+      { selector: 'section h1' },
+      { selector: 'section h2' },
+      { selector: 'section h3' },
+      { selector: 'section h4' },
+      { selector: 'section h5' },
+      { selector: 'section h6' },
+    ],
+    text: { selector: 'section p' },
   });
 
   expect(records).toEqual([
     {
-      lvl0: 'Main Title',
-      lvl1: 'Some Subtitle',
+      hierarchy: ['Main Title', 'Some Subtitle'],
       text: 'Some content\nSome content as well',
+      anchor: null,
     },
     {
-      lvl0: 'Main Title',
-      lvl1: 'Some other Subtitle',
+      hierarchy: ['Main Title', 'Some other Subtitle'],
       text: 'Some more content',
+      anchor: null,
     },
     {
-      lvl0: 'Main Title',
-      lvl1: 'Some other Subtitle',
-      lvl2: 'Such a deep title',
+      hierarchy: ['Main Title', 'Some other Subtitle', 'Such a deep title'],
       text: 'And such deep content',
+      anchor: null,
     },
-    { lvl0: 'Main Title', lvl1: 'Back up again', text: 'The end' },
+    {
+      hierarchy: ['Main Title', 'Back up again'],
+      text: 'The end',
+      anchor: null,
+    },
   ]);
 });
 
@@ -63,19 +68,22 @@ test("Doesn't find things outside of selectors", () => {
   `);
 
   const records = extractRecords(window.document.body, {
-    lvl0: 'section h1',
-    lvl1: 'section h2',
-    lvl2: 'section h3',
-    lvl3: 'section h4',
-    lvl4: 'section h5',
-    lvl5: 'section h6',
-    text: 'section p',
+    hierarchy: [
+      { selector: 'section h1' },
+      { selector: 'section h2' },
+      { selector: 'section h3' },
+      { selector: 'section h4' },
+      { selector: 'section h5' },
+      { selector: 'section h6' },
+    ],
+    text: { selector: 'section p' },
   });
 
   expect(records).toEqual([
     {
-      lvl0: 'Some Title',
+      hierarchy: ['Some Title'],
       text: 'Some content',
+      anchor: null,
     },
   ]);
 });
@@ -88,31 +96,38 @@ test('Understands anchors', () => {
       <p>Some content</p>
       <h2>Some other Subtitle<span id="anchor2"/></h2>
       <p>Some more content</p>
+      <h2>Some Subtitle without anchor</h2>
+      <p>Even more content</p>
     </section>
   `);
 
   const records = extractRecords(window.document.body, {
-    lvl0: 'section h1',
-    lvl1: 'section h2',
-    lvl2: 'section h3',
-    lvl3: 'section h4',
-    lvl4: 'section h5',
-    lvl5: 'section h6',
-    text: 'section p',
+    hierarchy: [
+      { selector: 'section h1' },
+      { selector: 'section h2' },
+      { selector: 'section h3' },
+      { selector: 'section h4' },
+      { selector: 'section h5' },
+      { selector: 'section h6' },
+    ],
+    text: { selector: 'section p' },
   });
 
   expect(records).toEqual([
     {
-      lvl0: 'Main Title',
-      lvl1: 'Some Subtitle',
+      hierarchy: ['Main Title', 'Some Subtitle'],
       anchor: 'anchor1',
       text: 'Some content',
     },
     {
-      lvl0: 'Main Title',
+      hierarchy: ['Main Title', 'Some other Subtitle'],
       anchor: 'anchor2',
-      lvl1: 'Some other Subtitle',
       text: 'Some more content',
+    },
+    {
+      hierarchy: ['Main Title', 'Some Subtitle without anchor'],
+      anchor: null,
+      text: 'Even more content',
     },
   ]);
 });
