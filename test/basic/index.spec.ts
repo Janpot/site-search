@@ -43,14 +43,22 @@ declare global {
   }
 }
 
-test('test', async () => {
+beforeAll(async () => {
   await rm(OUTPUT_FOLDER, { recursive: true, force: true });
   await mkdir(OUTPUT_FOLDER);
+});
+
+afterAll(async () => {
+  await rm(OUTPUT_FOLDER, { recursive: true, force: true });
+});
+
+test('test', async () => {
   await execa(CLI, [], {
     cwd: __dirname,
     stdio: 'inherit',
   });
 
+  // @ts-expect-error './output/site-search.json' gets cleaned up between tests
   const { corpus } = await import('./output/site-search.json');
   expect(corpus).toContainEqual(
     expect.documentMatching({

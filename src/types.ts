@@ -15,10 +15,11 @@ export type ContentSelectors = {
 };
 
 export interface SiteSearchConfig {
-  siteStartCmd: string;
+  siteStartCmd?: string;
   siteOrigin: string;
   siteReadyProbe: string;
   outputPath: string;
+  allowedPaths?: string;
   selectors: ContentSelectors;
 }
 

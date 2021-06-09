@@ -9,20 +9,24 @@ import { SiteSearchConfig, IndexedDocument } from './types';
 import PromiseQueue from './PromiseQueue';
 import lunr from 'lunr';
 import { writeFile } from 'fs/promises';
+import arg from 'arg';
+
+const args = arg({});
 
 const ajv = new Ajv();
 
-const projectRoot = process.cwd();
+const projectRoot = args._[0] || process.cwd();
 
 const configPath = resolve(projectRoot, 'site-search.config');
 
 const configSchema: JSONSchemaType<SiteSearchConfig> = {
   type: 'object',
   properties: {
-    siteStartCmd: { type: 'string' },
+    siteStartCmd: { type: 'string', nullable: true },
     siteOrigin: { type: 'string' },
     siteReadyProbe: { type: 'string' },
     outputPath: { type: 'string' },
+    allowedPaths: { type: 'string', nullable: true },
     selectors: {
       type: 'object',
       properties: {
@@ -37,7 +41,7 @@ const configSchema: JSONSchemaType<SiteSearchConfig> = {
       required: ['lvl0', 'lvl1', 'lvl2', 'lvl3', 'lvl4', 'lvl5', 'text'],
     },
   },
-  required: ['siteStartCmd', 'siteOrigin', 'siteReadyProbe'],
+  required: ['siteOrigin', 'siteReadyProbe'],
   additionalProperties: false,
 };
 
@@ -73,12 +77,13 @@ async function waitUntilSiteReady(url: URL): Promise<void> {
 }
 
 function extractLinks(doc: Document, config: SiteSearchConfig): string[] {
+  const guard = config.allowedPaths ? new RegExp(config.allowedPaths) : /.*/;
   const result: string[] = [];
   for (const anchor of doc.querySelectorAll('a')) {
     const url = new URL(anchor.href);
     url.search = '';
     url.hash = '';
-    if (url.origin === config.siteOrigin) {
+    if (url.origin === config.siteOrigin && guard.test(url.pathname)) {
       result.push(url.toString());
     }
   }
@@ -98,15 +103,21 @@ export default async function run() {
 
     const resolvedOutputPath = resolve(dirname(configPath), config.outputPath);
 
-    console.log(`Starting site with "${config.siteStartCmd}"`);
-    siteProcess = execa.command(config.siteStartCmd, {
-      stdio: 'inherit',
-    });
+    if (config.siteStartCmd) {
+      console.log(`Starting site with "${config.siteStartCmd}"`);
+      siteProcess = execa.command(config.siteStartCmd, {
+        stdio: 'inherit',
+      });
+    }
 
     await Promise.race([
-      siteProcess.then(() => {
-        throw new Error(`Site process stopped unexpectedly`);
-      }),
+      ...(siteProcess
+        ? [
+            siteProcess.then(() => {
+              throw new Error(`Site process stopped unexpectedly`);
+            }),
+          ]
+        : []),
       (async () => {
         const siteReadyProbeUrl = new URL(
           config.siteReadyProbe,
@@ -186,10 +197,12 @@ export default async function run() {
       })(),
     ]);
 
-    await Promise.all([
-      siteProcess.cancel(),
-      siteProcess.catch(() => undefined),
-    ]);
+    if (siteProcess) {
+      await Promise.all([
+        siteProcess.cancel(),
+        siteProcess.catch(() => undefined),
+      ]);
+    }
 
     console.log('Done');
   } finally {

@@ -14,7 +14,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     // "noUnusedLocals": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "listFiles": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "./**/site-search.json"]
 }
