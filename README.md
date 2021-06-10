@@ -18,17 +18,19 @@ yarn add -D site-search
 module.exports = {
   siteStartCmd: `yarn start`,
   siteOrigin: 'http://localhost:3000',
-  siteReadyProbe: '/',
+  siteStartUrl: '/',
   outputPath: './site-search-index.json',
-  selectors: {
-    lvl0: 'h1',
-    lvl1: 'h2',
-    lvl2: 'h3',
-    lvl3: 'h4',
-    lvl4: 'h5',
-    lvl5: 'h6',
-    text: 'p',
-  },
+  rules: [
+    {
+      hierarchy: [
+        { selector: 'h1' },
+        { selector: 'h2' },
+        { selector: 'h3' },
+        { selector: 'h4' },
+      ],
+      text: { selector: 'p' },
+    },
+  ],
 };
 ```
 
@@ -49,6 +51,6 @@ app.use('/search', handler(indexData));
 
 **`siteStartCmd`**: Command that should be run to start your website
 **`siteOrigin`**: Url of where the running website can be reached
-**`siteReadyProbe`**: Path that can be polled to determine the website is ready for crawling. Crawling doesn't start until this returns a `200`
+**`siteStartUrl`**: Url where crawling should start
 **`outputPath`**: Where to store the resulting index data
-**`selectors`**: Selectors to extract hierarchy. Similar to [how Algolia does it](https://docsearch.algolia.com/docs/how-do-we-build-an-index)
+**`rules`**: Rules to extract hierarchy. A bit similar to [how Algolia does it](https://docsearch.algolia.com/docs/how-do-we-build-an-index)

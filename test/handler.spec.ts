@@ -30,10 +30,5 @@ test('handler', async () => {
   const res = await fetch(`http://localhost:${port}/search?q=react`);
   expect(res).toHaveProperty('status', 200);
   const body = await res.json();
-  console.log(JSON.stringify(body, null, 2));
-  expect(body).toEqual(
-    expect.objectContaining({
-      results: expect.arrayContaining([]),
-    })
-  );
+  expect(body).toMatchSnapshot();
 });

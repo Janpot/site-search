@@ -1,0 +1,280 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handler 1`] = `
+Object {
+  "results": Array [
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "Implementation Notes",
+        },
+        null,
+        Object {
+          "content": "Jumping into the Code ",
+        },
+        null,
+        null,
+      ],
+      "score": 4.420648571906198,
+      "snippet": Object {
+        "parts": Array [
+          "",
+          "ReactMount",
+          " is where the code like mountTree() and unmountTree() from this tutorial lives. It takes…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.PureComponent ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.9187031112896444,
+      "snippet": Object {
+        "parts": Array [
+          "",
+          "React.PureComponent",
+          " is similar to ",
+          "React.Component.",
+          " The difference between them is that ",
+          "React.Component",
+          "…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.PureComponent ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.9187031112896444,
+      "snippet": Object {
+        "parts": Array [
+          "",
+          "React.PureComponent",
+          " is similar to ",
+          "React.Component.",
+          " The difference between them is that ",
+          "React.Component",
+          "…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "ReactDOM",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "render() ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.7589419469547867,
+      "snippet": Object {
+        "parts": Array [
+          "Render a ",
+          "React",
+          " element into the DOM in the supplied container and return a reference to the component…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.Children ",
+        },
+        Object {
+          "content": "React.Children.only ",
+        },
+        null,
+      ],
+      "score": 2.7515934777264364,
+      "snippet": Object {
+        "parts": Array [
+          "Verifies that children has only one child (a ",
+          "React",
+          " element) and returns it. Otherwise this method…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.Children ",
+        },
+        Object {
+          "content": "React.Children.only ",
+        },
+        null,
+      ],
+      "score": 2.7515934777264364,
+      "snippet": Object {
+        "parts": Array [
+          "Verifies that children has only one child (a ",
+          "React",
+          " element) and returns it. Otherwise this method…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "ReactDOMServer",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "renderToStaticNodeStream() ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.732677973601611,
+      "snippet": Object {
+        "parts": Array [
+          "…except this doesn’t create extra DOM attributes that ",
+          "React",
+          " uses internally, such as data-",
+          "reactroot.",
+          " This…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.Suspense ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.6835520959824595,
+      "snippet": Object {
+        "parts": Array [
+          "",
+          "React.Suspense",
+          " lets you specify the loading indicator in case some components in the tree below it…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.Suspense ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.6835520959824595,
+      "snippet": Object {
+        "parts": Array [
+          "",
+          "React.Suspense",
+          " lets you specify the loading indicator in case some components in the tree below it…",
+        ],
+      },
+    },
+    Object {
+      "hierarchy": Array [
+        Object {
+          "content": "Documentation",
+        },
+        Object {
+          "content": "React Top-Level API",
+        },
+        Object {
+          "content": "Reference ",
+        },
+        Object {
+          "content": "React.lazy ",
+        },
+        null,
+        null,
+      ],
+      "score": 2.558764201864005,
+      "snippet": Object {
+        "parts": Array [
+          "",
+          "React.lazy()",
+          " lets you define a component that is loaded dynamically. This helps reduce the bundle size…",
+        ],
+      },
+    },
+  ],
+}
+`;
