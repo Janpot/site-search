@@ -18,7 +18,7 @@ yarn add -D site-search
 module.exports = {
   siteStartCmd: `yarn start`,
   siteOrigin: 'http://localhost:3000',
-  siteStartUrl: '/',
+  startUrl: '/',
   outputPath: './site-search-index.json',
   rules: [
     {
@@ -51,6 +51,6 @@ app.use('/search', handler(indexData));
 
 **`siteStartCmd`**: Command that should be run to start your website
 **`siteOrigin`**: Url of where the running website can be reached
-**`siteStartUrl`**: Url where crawling should start
+**`startUrl`**: Url where crawling should start
 **`outputPath`**: Where to store the resulting index data
 **`rules`**: Rules to extract hierarchy. A bit similar to [how Algolia does it](https://docsearch.algolia.com/docs/how-do-we-build-an-index)
