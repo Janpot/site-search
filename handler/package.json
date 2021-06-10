@@ -1,0 +1,5 @@
+{
+  "source": "../src/handler.ts",
+  "main": "../dist/handler.js",
+  "module": "../dist/handler.module.js"
+}

@@ -61,6 +61,8 @@ async function search(
       hierarchy: doc.hierarchy.map((content) => (content ? { content } : null)),
       score: result.score,
       snippet,
+      path: doc.path,
+      anchor: doc.anchor,
     };
   });
 }
@@ -82,6 +84,8 @@ export interface SearchApiResult {
   hierarchy: (HierarchyLevel | null)[];
   score: number;
   snippet: Snippet;
+  path: string;
+  anchor: string | null;
 }
 
 export interface SearchApiResponse {
