@@ -22,21 +22,18 @@ test('Basic text extraction', () => {
       { selector: 'section h1' },
       { selector: 'section h2' },
       { selector: 'section h3' },
-      { selector: 'section h4' },
-      { selector: 'section h5' },
-      { selector: 'section h6' },
     ],
     text: { selector: 'section p' },
   });
 
   expect(records).toEqual([
     {
-      hierarchy: ['Main Title', 'Some Subtitle'],
+      hierarchy: ['Main Title', 'Some Subtitle', null],
       text: 'Some content\nSome content as well',
       anchor: null,
     },
     {
-      hierarchy: ['Main Title', 'Some other Subtitle'],
+      hierarchy: ['Main Title', 'Some other Subtitle', null],
       text: 'Some more content',
       anchor: null,
     },
@@ -46,7 +43,7 @@ test('Basic text extraction', () => {
       anchor: null,
     },
     {
-      hierarchy: ['Main Title', 'Back up again'],
+      hierarchy: ['Main Title', 'Back up again', null],
       text: 'The end',
       anchor: null,
     },
@@ -68,20 +65,13 @@ test("Doesn't find things outside of selectors", () => {
   `);
 
   const records = extractRecords(window.document.body, {
-    hierarchy: [
-      { selector: 'section h1' },
-      { selector: 'section h2' },
-      { selector: 'section h3' },
-      { selector: 'section h4' },
-      { selector: 'section h5' },
-      { selector: 'section h6' },
-    ],
+    hierarchy: [{ selector: 'section h1' }, { selector: 'section h2' }],
     text: { selector: 'section p' },
   });
 
   expect(records).toEqual([
     {
-      hierarchy: ['Some Title'],
+      hierarchy: ['Some Title', null],
       text: 'Some content',
       anchor: null,
     },
@@ -102,14 +92,7 @@ test('Understands anchors', () => {
   `);
 
   const records = extractRecords(window.document.body, {
-    hierarchy: [
-      { selector: 'section h1' },
-      { selector: 'section h2' },
-      { selector: 'section h3' },
-      { selector: 'section h4' },
-      { selector: 'section h5' },
-      { selector: 'section h6' },
-    ],
+    hierarchy: [{ selector: 'section h1' }, { selector: 'section h2' }],
     text: { selector: 'section p' },
   });
 
@@ -128,6 +111,28 @@ test('Understands anchors', () => {
       hierarchy: ['Main Title', 'Some Subtitle without anchor'],
       anchor: null,
       text: 'Even more content',
+    },
+  ]);
+});
+
+test('Handles default valiue', () => {
+  const { window } = new JSDOM(`
+    <body>
+      <h2>Some Title</h2>
+      <p>Some content</p>
+    </body>
+  `);
+
+  const records = extractRecords(window.document.body, {
+    hierarchy: [{ selector: 'h1', default: 'Default' }, { selector: 'h2' }],
+    text: { selector: 'p' },
+  });
+
+  expect(records).toEqual([
+    {
+      hierarchy: ['Default', 'Some Title'],
+      text: 'Some content',
+      anchor: null,
     },
   ]);
 });

@@ -7,7 +7,7 @@ module.exports = {
   rules: [{
     test: '^\/docs(\/|$)',
     hierarchy: [
-      { selector: 'nav [aria-expanded=true]' },
+      { selector: 'nav [aria-expanded=true]', default: 'Documentation' },
       { selector: 'article h1' },
       { selector: 'article h2' },
       { selector: 'article h3' },

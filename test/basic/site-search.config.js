@@ -9,13 +9,7 @@ module.exports = {
   outputPath: './output/site-search.json',
   rules: [
     {
-      hierarchy: [
-        { selector: 'h1' },
-        { selector: 'h2' },
-        { selector: 'h3' },
-        { selector: 'h4' },
-        { selector: 'h5' },
-      ],
+      hierarchy: [{ selector: 'h1' }, { selector: 'h2' }, { selector: 'h3' }],
       text: { selector: 'p' },
     },
   ],

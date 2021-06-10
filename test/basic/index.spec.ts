@@ -25,14 +25,14 @@ test('test', async () => {
   expect(corpus).toContainEqual(
     expect.objectContaining({
       path: '/',
-      hierarchy: ['Title', 'Subtitle 1'],
+      hierarchy: ['Title', 'Subtitle 1', null],
       text: 'Content 1',
     })
   );
   expect(corpus).toContainEqual(
     expect.objectContaining({
       path: '/',
-      hierarchy: ['Title', 'Subtitle 2'],
+      hierarchy: ['Title', 'Subtitle 2', null],
       text: 'Content 2',
     })
   );
@@ -46,28 +46,28 @@ test('test', async () => {
   expect(corpus).toContainEqual(
     expect.objectContaining({
       path: '/',
-      hierarchy: ['Title', 'Subtitle 4'],
+      hierarchy: ['Title', 'Subtitle 4', null],
       text: 'Content 5',
     })
   );
   expect(corpus).toContainEqual(
     expect.objectContaining({
       path: '/foo.html',
-      hierarchy: ['Foo Title'],
+      hierarchy: ['Foo Title', null, null],
       text: 'Content',
     })
   );
   expect(corpus).toContainEqual(
     expect.objectContaining({
       path: '/nested.html',
-      hierarchy: ['Nested Title'],
+      hierarchy: ['Nested Title', null, null],
       text: 'Content',
     })
   );
   expect(corpus).toContainEqual(
     expect.objectContaining({
       path: '/nested.html',
-      hierarchy: ['Nested Title'],
+      hierarchy: ['Nested Title', null, null],
       text: 'Content',
     })
   );
@@ -75,7 +75,7 @@ test('test', async () => {
     expect.objectContaining({
       path: '/deep-links.html',
       anchor: 'anchor2',
-      hierarchy: ['Deep Links', 'Subtitle 1'],
+      hierarchy: ['Deep Links', 'Subtitle 1', null],
       text: 'Content 1',
     })
   );
@@ -83,7 +83,7 @@ test('test', async () => {
     expect.objectContaining({
       path: '/deep-links.html',
       anchor: 'anchor3',
-      hierarchy: ['Deep Links', 'Subtitle 2'],
+      hierarchy: ['Deep Links', 'Subtitle 2', null],
       text: 'Content 2',
     })
   );

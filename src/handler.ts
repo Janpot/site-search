@@ -58,7 +58,7 @@ async function search(
     const snippet = buildSnippet(doc.text, { highlights });
 
     return {
-      hierarchy: doc.hierarchy,
+      hierarchy: doc.hierarchy.map((content) => (content ? { content } : null)),
       score: result.score,
       snippet,
     };
@@ -74,8 +74,12 @@ export interface Options {
   data: SerializedIndexData;
 }
 
+export interface HierarchyLevel {
+  content: string;
+}
+
 export interface SearchApiResult {
-  hierarchy: (string | null)[];
+  hierarchy: (HierarchyLevel | null)[];
   score: number;
   snippet: Snippet;
 }

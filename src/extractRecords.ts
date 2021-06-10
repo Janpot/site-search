@@ -40,58 +40,49 @@ export default function extractRecords(
   selectors: ContentRule
 ): IndexedRecord[] {
   const result: IndexedRecord[] = [];
-  let currentHierarchy: (string | null)[] = [];
-  let currentText: string | null = null;
   let currentLevel: number | null = null;
-  let currentAnchor: string | null = null;
+
+  let current: IndexedRecord = {
+    hierarchy: selectors.hierarchy.map(() => null),
+    anchor: null,
+    text: '',
+  };
 
   walk(root, (elm) => {
     const level = getLevel(elm, selectors);
     const isText = elm.matches(selectors.text.selector);
     const content = innerText(elm);
     const anchor = getAnchor(elm);
-    if (!content) {
-      return true;
-    } else if (typeof level !== 'number' && !isText) {
+
+    if (!content || (typeof level !== 'number' && !isText)) {
       return true;
     } else if (isText) {
-      currentText = (currentText ? currentText + '\n' : '') + content.trim();
-    } else if (typeof level === 'number' && typeof currentLevel === 'number') {
-      if (!currentText && currentLevel < level) {
-        currentLevel = level;
-        currentHierarchy[level] = content;
-      } else {
-        if (currentText) {
-          result.push({
-            hierarchy: [...currentHierarchy],
-            text: currentText,
-            anchor: currentAnchor,
-          });
-        }
-        currentHierarchy = currentHierarchy.slice(0, level + 1);
-        currentText = null;
-        currentAnchor = null;
-        currentHierarchy[level] = content;
-      }
-      if (anchor) {
-        currentAnchor = anchor;
-      }
+      current.text = (current.text ? current.text + '\n' : '') + content.trim();
     } else if (typeof level === 'number') {
-      currentLevel = level;
-      currentHierarchy[level] = content;
-      if (anchor) {
-        currentAnchor = anchor;
+      if (current.text && typeof currentLevel === 'number') {
+        result.push(current);
       }
+
+      currentLevel = level;
+      current = {
+        ...current,
+        text: '',
+        anchor,
+        hierarchy: current.hierarchy.map((value, i) =>
+          i < level
+            ? value || selectors.hierarchy[i].default || null
+            : i === level
+            ? content
+            : null
+        ),
+      };
     }
+
     return false;
   });
 
-  if (currentText) {
-    result.push({
-      hierarchy: [...currentHierarchy],
-      text: currentText,
-      anchor: currentAnchor,
-    });
+  if (current.text) {
+    result.push(current);
   }
 
   return result;
