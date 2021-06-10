@@ -1,4 +1,4 @@
-import { buildSnippet, BuildSnippetOptions } from './handler';
+import { buildSnippet, BuildSnippetOptions } from './snippets';
 
 test.each([
   ['hello world foo bar', { size: 8, margin: 1 }, ['hello wo…']],
