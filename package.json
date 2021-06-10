@@ -1,7 +1,7 @@
 {
   "name": "site-search",
   "description": "A lightweight self-hosted alternative to DocSearch",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "dependencies": {
     "ajv": "^8.5.0",
     "arg": "^5.0.0",
@@ -32,8 +32,14 @@
   "main": "./dist/index.js",
   "module": "./dist/index.module.js",
   "exports": {
-    ".": "./dist/index.modern.js",
-    "./handler": "./dist/handler.modern.js"
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.module.js"
+    },
+    "./handler": {
+      "require": "./dist/handler.js",
+      "import": "./dist/handler.module.js"
+    }
   },
   "files": [
     "./bin",
