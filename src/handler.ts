@@ -123,7 +123,7 @@ export function buildSnippet(
 }
 
 async function search(
-  { hierarchy, corpus, index: serializedLunrIndex }: SerializedIndexData,
+  { corpus, index: serializedLunrIndex }: SerializedIndexData,
   query: string
 ): Promise<SearchApiResult[]> {
   const index = getIndex(serializedLunrIndex);
@@ -148,7 +148,6 @@ async function search(
 export interface SerializedIndexData {
   corpus: IndexedDocument[];
   index: object;
-  hierarchy: `l_${number}`[];
 }
 
 export interface Options {

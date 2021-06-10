@@ -1,4 +1,4 @@
-import { ContentSelectors, IndexedRecord } from './types';
+import { ContentRule, IndexedRecord } from './types';
 
 function innerText(elm: Element) {
   const clone = elm.cloneNode(true) as Element;
@@ -15,7 +15,7 @@ function walk(elm: Element, visitor: (elm: Element) => boolean) {
   }
 }
 
-function getLevel(elm: Element, selectors: ContentSelectors): number | null {
+function getLevel(elm: Element, selectors: ContentRule): number | null {
   const level = selectors.hierarchy.findIndex(({ selector }) =>
     elm.matches(selector)
   );
@@ -37,7 +37,7 @@ function getAnchor(elm: Element) {
 
 export default function extractRecords(
   root: HTMLElement,
-  selectors: ContentSelectors
+  selectors: ContentRule
 ): IndexedRecord[] {
   const result: IndexedRecord[] = [];
   let currentHierarchy: (string | null)[] = [];

@@ -5,7 +5,7 @@ import Ajv, { JSONSchemaType } from 'ajv';
 import { URL } from 'url';
 import { JSDOM } from 'jsdom';
 import extractRecords from './extractRecords';
-import { SiteSearchConfig, IndexedDocument } from './types';
+import { SiteSearchConfig, IndexedDocument, ContentRule } from './types';
 import PromiseQueue from './PromiseQueue';
 import lunr from 'lunr';
 import { writeFile } from 'fs/promises';
@@ -33,19 +33,22 @@ const configSchema: JSONSchemaType<SiteSearchConfig> = {
   properties: {
     siteStartCmd: { type: 'string', nullable: true },
     siteOrigin: { type: 'string' },
-    siteReadyProbe: { type: 'string' },
+    startUrl: { type: 'string' },
     outputPath: { type: 'string' },
-    allowedPaths: { type: 'string', nullable: true },
-    selectors: {
-      type: 'object',
-      properties: {
-        hierarchy: { type: 'array', items: contentSelector },
-        text: contentSelector,
+    rules: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          test: { type: 'string', nullable: true },
+          hierarchy: { type: 'array', items: contentSelector },
+          text: contentSelector,
+        },
+        required: ['hierarchy', 'text'],
       },
-      required: ['hierarchy', 'text'],
     },
   },
-  required: ['siteOrigin', 'siteReadyProbe'],
+  required: ['siteOrigin', 'startUrl'],
   additionalProperties: false,
 };
 
@@ -80,14 +83,26 @@ async function waitUntilSiteReady(url: URL): Promise<void> {
   }
 }
 
+function findRule(rules: ContentRule[], pathname: string): ContentRule | null {
+  for (const rule of rules) {
+    const match = !rule.test || new RegExp(rule.test).test(pathname);
+    if (match) {
+      return rule;
+    }
+  }
+  return null;
+}
+
 function extractLinks(doc: Document, config: SiteSearchConfig): string[] {
-  const guard = config.allowedPaths ? new RegExp(config.allowedPaths) : /.*/;
   const result: string[] = [];
   for (const anchor of doc.querySelectorAll('a')) {
     const url = new URL(anchor.href);
     url.search = '';
     url.hash = '';
-    if (url.origin === config.siteOrigin && guard.test(url.pathname)) {
+    if (
+      url.origin === config.siteOrigin &&
+      findRule(config.rules, url.pathname)
+    ) {
       result.push(url.toString());
     }
   }
@@ -123,12 +138,9 @@ export default async function run() {
           ]
         : []),
       (async () => {
-        const siteReadyProbeUrl = new URL(
-          config.siteReadyProbe,
-          config.siteOrigin
-        );
-        console.log(`Waiting until site ready at ${siteReadyProbeUrl}`);
-        await waitUntilSiteReady(siteReadyProbeUrl);
+        const parsedStartUrl = new URL(config.startUrl, config.siteOrigin);
+        console.log(`Waiting until site ready at ${parsedStartUrl}`);
+        await waitUntilSiteReady(parsedStartUrl);
         console.log(`Site ready`);
 
         const queue = new PromiseQueue({ concurrency: 5 });
@@ -144,6 +156,12 @@ export default async function run() {
           seen.add(url);
           const { pathname } = new URL(url);
 
+          const rule = findRule(config.rules, pathname);
+          if (!rule) {
+            console.log('Skipped url', pathname);
+            return;
+          }
+
           const links = await queue.add(async () => {
             console.log(`Fetching ${url}`);
             const res = await fetch(url);
@@ -153,10 +171,7 @@ export default async function run() {
               contentType: res.headers.get('content-type') || 'text/html',
             });
 
-            const records = extractRecords(
-              window.document.body,
-              config.selectors
-            );
+            const records = extractRecords(window.document.body, rule);
 
             corpus.push(
               ...records.map((record) => ({ path: pathname, ...record }))
@@ -170,12 +185,20 @@ export default async function run() {
           await Promise.all(links.map((link) => crawl(link)));
         };
 
-        await crawl(siteReadyProbeUrl.toString());
+        await crawl(parsedStartUrl.toString());
+
+        const maxLevel = Math.max(
+          0,
+          ...config.rules.map((rule) => rule.hierarchy.length)
+        );
+        const hierarchy: string[] = [];
 
         const index = lunr(function () {
           this.ref('id');
-          for (const level of config.selectors.hierarchy.keys()) {
-            this.field(`l_${level}`, {
+          for (let level = 0; level < maxLevel; level++) {
+            const field = `l_${level}`;
+            hierarchy.push(field);
+            this.field(field, {
               extractor: (doc: object) =>
                 (doc as IndexedDocument).hierarchy[level] || '',
             });
@@ -196,10 +219,7 @@ export default async function run() {
           JSON.stringify({
             corpus,
             index: index.toJSON(),
-            hierarchy: Array.from(
-              config.selectors.hierarchy.keys(),
-              (level) => `l_${level}`
-            ),
+            hierarchy,
           })
         );
       })(),

@@ -3,7 +3,8 @@ export interface ContentSelector {
   default?: string;
 }
 
-export interface ContentSelectors {
+export interface ContentRule {
+  test?: string;
   hierarchy: ContentSelector[];
   text: ContentSelector;
 }
@@ -11,10 +12,9 @@ export interface ContentSelectors {
 export interface SiteSearchConfig {
   siteStartCmd?: string;
   siteOrigin: string;
-  siteReadyProbe: string;
+  startUrl: string;
   outputPath: string;
-  allowedPaths?: string;
-  selectors: ContentSelectors;
+  rules: ContentRule[];
 }
 
 export interface IndexedRecord {
