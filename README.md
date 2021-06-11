@@ -39,13 +39,18 @@ module.exports = {
 4. Add the search endpoint to your app:
 
 ```ts
+const path = require('path');
 const handler = require('site-search/handler');
-const indexData = require('./site-search-index.json');
 // ...
-app.use('/search', handler(indexData));
+app.use(
+  '/search',
+  handler({
+    filename: path.resolve(__dirname, '../site-search-index.json'),
+  })
+);
 ```
 
-5. Now you can use `/search?q=foo` to find document matching "foo"
+5. Now you can use `/search?q=foo` to find documents matching "foo"
 
 ## Config
 

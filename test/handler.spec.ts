@@ -2,21 +2,19 @@ import handler from '../src/handler';
 import express from 'express';
 import { Server } from 'http';
 import fetch from 'node-fetch';
-import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 
 let server: Server;
 const port = 3001;
 
 beforeAll(async () => {
-  const index = JSON.parse(
-    await readFile(
-      resolve(__dirname, './__fixtures__/reactjs/site-search.json'),
-      { encoding: 'utf-8' }
-    )
-  );
   const app = express();
-  app.use('/search', handler({ data: index }));
+  app.use(
+    '/search',
+    handler({
+      filename: resolve(__dirname, './__fixtures__/reactjs/site-search.json'),
+    })
+  );
   return new Promise((resolve, reject) => {
     server = app.listen(port).once('listening', resolve).once('error', reject);
   });

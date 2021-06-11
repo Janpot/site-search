@@ -2,6 +2,7 @@ import lunr from 'lunr';
 import { IncomingMessage, ServerResponse } from 'http';
 import { IndexedDocument } from './types';
 import { buildSnippet, Snippet } from './snippets';
+import { readFile } from 'fs/promises';
 
 let lunrIndex: lunr.Index | undefined;
 function getIndex(serializedLunrIndex: object): lunr.Index {
@@ -73,7 +74,7 @@ export interface SerializedIndexData {
 }
 
 export interface Options {
-  data: SerializedIndexData;
+  filename: string;
 }
 
 export interface HierarchyLevel {
@@ -93,10 +94,19 @@ export interface SearchApiResponse {
 }
 
 export default function (options: Options) {
+  let dataPromise: Promise<SerializedIndexData>;
+
   return async (req: IncomingMessage, res: ServerResponse) => {
+    if (!dataPromise) {
+      dataPromise = readFile(options.filename, 'utf-8').then((file) =>
+        JSON.parse(file)
+      );
+    }
+
+    const data = await dataPromise;
     const { searchParams } = new URL(req.url!, 'http://x');
     const query = searchParams.get('q');
-    const results = query ? await search(options.data, query + '*') : [];
+    const results = query ? await search(data, query + '*') : [];
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({ results }));
   };
